@@ -7,6 +7,7 @@ class Counter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    TextEditingController textEditingController = TextEditingController();
 
     print("objectOne");
     return Scaffold(

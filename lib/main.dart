@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc_tutorial/counter/bloc/counter_bloc.dart';
 import 'package:flutter_bloc_tutorial/counter/counter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-void main() {
+import 'package:flutter_bloc_tutorial/search/search_file.dart';
+void main()async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -18,7 +20,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         ),
-        home: const Counter(),
+        home: const SearchableHtmlPage(),
       ),
     );
   }
