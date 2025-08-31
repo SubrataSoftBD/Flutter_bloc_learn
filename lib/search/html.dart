@@ -137,7 +137,7 @@ class _HtmlSearchViewState extends State<HtmlSearchView> {
   void parseBlocks() {
     // Split into <p>, <h1>, <img> blocks
     final regex = RegExp(
-      r"<(p|h1|img).*?>.*?</\1>|<img.*?>",
+      r"<(p|h[1-6]|div|ul|ol|li|blockquote)[^>]*>.*?</\1>|<img[^>]*>",
       dotAll: true,
       caseSensitive: false,
     );
@@ -173,8 +173,7 @@ class _HtmlSearchViewState extends State<HtmlSearchView> {
 
       final regex = RegExp(RegExp.escape(searchTerm), caseSensitive: false);
       for (final m in regex.allMatches(blockText)) {
-        allMatches.add(MatchInfo
-          (blockIndex: i, start: m.start, end: m.end));
+        allMatches.add(MatchInfo(blockIndex: i, start: m.start, end: m.end));
       }
     }
 
@@ -213,7 +212,57 @@ class _HtmlSearchViewState extends State<HtmlSearchView> {
     }
   }
 
+  String highlightBlock(String html, int blockIndex) {
+    // ✅ যদি <img> হয় → 그대로 ফেরত দিন
+    if (html.trimLeft().toLowerCase().startsWith("<img")) {
+      return html;
+    }
+
+    if (searchTerm.isEmpty) return html;
+
+    // ✅ ট্যাগ এবং ভেতরের কন্টেন্ট ধরার জন্য Regex
+    final match = RegExp(
+      r"<(\w+)([^>]*)>(.*?)</\1>", // যেকোনো ট্যাগ ধরবে (p, h1, h2, div, li...)
+      dotAll: true,
+      caseSensitive: false,
+    ).firstMatch(html);
+
+    if (match == null) return html;
+
+    final tagName = match.group(1); // যেমন "p" বা "h1"
+    final innerContent = match.group(3) ?? "";
+
+    final buffer = StringBuffer();
+    int lastIndex = 0;
+
+    final blockMatches = allMatches.where((m) => m.blockIndex == blockIndex).toList();
+
+    for (int i = 0; i < blockMatches.length; i++) {
+      final m = blockMatches[i];
+      buffer.write(innerContent.substring(lastIndex, m.start));
+
+      bool isActiveMatch = allMatches[activeMatchIndex] == m;
+
+      buffer.write(
+        '<span style="background-color:${isActiveMatch ? 'red' : 'yellow'};">${innerContent.substring(m.start, m.end)}</span>',
+      );
+
+      lastIndex = m.end;
+    }
+
+    buffer.write(innerContent.substring(lastIndex));
+
+    // ✅ একই ট্যাগে wrap করে রিটার্ন করুন
+    return "<$tagName>${buffer.toString()}</$tagName>";
+  }
+
+  //
   // String highlightBlock(String html, int blockIndex) {
+  //   // ✅ If it's an <img>, don't modify, just return
+  //   if (html.trimLeft().toLowerCase().startsWith("<img")) {
+  //     return html;
+  //   }
+  //
   //   if (searchTerm.isEmpty) return html;
   //
   //   final text =
@@ -242,36 +291,6 @@ class _HtmlSearchViewState extends State<HtmlSearchView> {
   //   buffer.write(text.substring(lastIndex));
   //   return "<p>${buffer.toString()}</p>";
   // }
-  String highlightBlock(String html, int blockIndex) {
-    // ✅ If it's an <img>, don't modify, just return
-    if (html.trimLeft().toLowerCase().startsWith("<img")) {
-      return html;
-    }
-
-    if (searchTerm.isEmpty) return html;
-
-    final text = RegExp(r"<(p|h1)>(.*?)</\1>", dotAll: true, caseSensitive: false)
-        .firstMatch(html)
-        ?.group(2) ??
-        "";
-
-    final buffer = StringBuffer();
-    int lastIndex = 0;
-
-    final blockMatches =
-    allMatches.where((m) => m.blockIndex == blockIndex).toList();
-    for (int i = 0; i < blockMatches.length; i++) {
-      final m = blockMatches[i];
-      buffer.write(text.substring(lastIndex, m.start));
-      bool isActiveMatch = allMatches[activeMatchIndex] == m;
-      buffer.write(
-        '<span style="background-color:${isActiveMatch ? 'red' : 'yellow'};">${text.substring(m.start, m.end)}</span>',
-      );
-      lastIndex = m.end;
-    }
-    buffer.write(text.substring(lastIndex));
-    return "<p>${buffer.toString()}</p>";
-  }
 
   void clearSearch() {
     searchController.clear();
@@ -329,11 +348,7 @@ class MatchInfo {
   final int start;
   final int end;
 
-  MatchInfo({
-    required this.blockIndex,
-    required this.start,
-    required this.end,
-  });
+  MatchInfo({required this.blockIndex, required this.start, required this.end});
 }
 
 // class HtmlSearchView extends StatefulWidget {
