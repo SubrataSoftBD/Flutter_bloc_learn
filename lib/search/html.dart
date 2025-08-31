@@ -126,7 +126,7 @@ class _HtmlSearchViewState extends State<HtmlSearchView> {
   int activeMatchIndex = 0;
   List<GlobalKey> blockKeys = [];
   List<String> blocks = [];
-  List<_MatchInfo> allMatches = [];
+  List<MatchInfo> allMatches = [];
 
   @override
   void initState() {
@@ -173,7 +173,8 @@ class _HtmlSearchViewState extends State<HtmlSearchView> {
 
       final regex = RegExp(RegExp.escape(searchTerm), caseSensitive: false);
       for (final m in regex.allMatches(blockText)) {
-        allMatches.add(_MatchInfo(blockIndex: i, start: m.start, end: m.end));
+        allMatches.add(MatchInfo
+          (blockIndex: i, start: m.start, end: m.end));
       }
     }
 
@@ -323,12 +324,12 @@ class _HtmlSearchViewState extends State<HtmlSearchView> {
   }
 }
 
-class _MatchInfo {
+class MatchInfo {
   final int blockIndex;
   final int start;
   final int end;
 
-  _MatchInfo({
+  MatchInfo({
     required this.blockIndex,
     required this.start,
     required this.end,
