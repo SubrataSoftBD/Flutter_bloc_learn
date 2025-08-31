@@ -135,7 +135,6 @@ class _HtmlSearchViewState extends State<HtmlSearchView> {
   }
 
   void parseBlocks() {
-    // Split into <p>, <h1>, <img> blocks
     final regex = RegExp(
       r"<(p|h[1-6]|div|ul|ol|li|blockquote)[^>]*>.*?</\1>|<img[^>]*>",
       dotAll: true,
@@ -213,29 +212,29 @@ class _HtmlSearchViewState extends State<HtmlSearchView> {
   }
 
   String highlightBlock(String html, int blockIndex) {
-    // ✅ যদি <img> হয় → 그대로 ফেরত দিন
     if (html.trimLeft().toLowerCase().startsWith("<img")) {
       return html;
     }
 
     if (searchTerm.isEmpty) return html;
 
-    // ✅ ট্যাগ এবং ভেতরের কন্টেন্ট ধরার জন্য Regex
     final match = RegExp(
-      r"<(\w+)([^>]*)>(.*?)</\1>", // যেকোনো ট্যাগ ধরবে (p, h1, h2, div, li...)
+      r"<(\w+)([^>]*)>(.*?)</\1>",
       dotAll: true,
       caseSensitive: false,
     ).firstMatch(html);
 
     if (match == null) return html;
 
-    final tagName = match.group(1); // যেমন "p" বা "h1"
+    final tagName = match.group(1);
     final innerContent = match.group(3) ?? "";
 
     final buffer = StringBuffer();
     int lastIndex = 0;
 
-    final blockMatches = allMatches.where((m) => m.blockIndex == blockIndex).toList();
+    final blockMatches = allMatches
+        .where((m) => m.blockIndex == blockIndex)
+        .toList();
 
     for (int i = 0; i < blockMatches.length; i++) {
       final m = blockMatches[i];
@@ -252,7 +251,6 @@ class _HtmlSearchViewState extends State<HtmlSearchView> {
 
     buffer.write(innerContent.substring(lastIndex));
 
-    // ✅ একই ট্যাগে wrap করে রিটার্ন করুন
     return "<$tagName>${buffer.toString()}</$tagName>";
   }
 
@@ -334,7 +332,8 @@ class _HtmlSearchViewState extends State<HtmlSearchView> {
             return Container(
               key: blockKeys[index],
               margin: const EdgeInsets.only(bottom: 12),
-              child: HtmlWidget(html),
+              child: HtmlWidget(html,
+              ),
             );
           }),
         ),
