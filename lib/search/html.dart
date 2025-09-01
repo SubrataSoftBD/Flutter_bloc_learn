@@ -141,6 +141,7 @@ class _HtmlSearchViewState extends State<HtmlSearchView> {
       caseSensitive: false,
     );
     blocks = regex.allMatches(content).map((m) => m.group(0) ?? "").toList();
+    print(blocks);
     blockKeys = List.generate(blocks.length, (_) => GlobalKey());
   }
 
