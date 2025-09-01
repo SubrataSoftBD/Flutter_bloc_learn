@@ -126,7 +126,7 @@ class _HtmlSearchViewState extends State<HtmlSearchView> {
   int activeMatchIndex = 0;
   List<GlobalKey> blockKeys = [];
   List<String> blocks = [];
-  List<MatchInfo> allMatches = [];
+  List<MatchInfo> allMatchesText = [];
 
   @override
   void initState() {
@@ -143,6 +143,7 @@ class _HtmlSearchViewState extends State<HtmlSearchView> {
     blocks = regex.allMatches(content).map((m) => m.group(0) ?? "").toList();
     print(blocks);
     blockKeys = List.generate(blocks.length, (_) => GlobalKey());
+    print("BlockKeys: ${List.from(blockKeys)}");
   }
 
   void onSearchChanged(String value) {
@@ -152,7 +153,7 @@ class _HtmlSearchViewState extends State<HtmlSearchView> {
   }
 
   void findAllMatches() {
-    allMatches.clear();
+    allMatchesText.clear();
     if (searchTerm.isEmpty) {
       setState(() {});
       return;
@@ -161,44 +162,66 @@ class _HtmlSearchViewState extends State<HtmlSearchView> {
     for (int i = 0; i < blocks.length; i++) {
       final blockText =
           RegExp(
-                r"<p>(.*?)</p>|<h1>(.*?)</h1>",
-                dotAll: true,
-                caseSensitive: false,
-              )
+            r"<p>(.*?)</p>|"
+            r"<h1>(.*?)</h1>|"
+            r"<h2>(.*?)</h2>|"
+            r"<h3>(.*?)</h3>|"
+            r"<div>(.*?)</div>|"
+            r"<span>(.*?)</span>|"
+            r"<li>(.*?)</li>|"
+            r"<strong>(.*?)</strong>|"
+            r"<em>(.*?)</em>",
+            dotAll: true,
+            caseSensitive: false,
+          )
               .firstMatch(blocks[i])
-              ?.groups([1, 2])
+              ?.groups([1, 2, 3, 4, 5, 6, 7, 8, 9])
               .whereType<String>()
               .join(" ") ??
-          "";
+              "";
+      // final blockText =
+      //     RegExp(
+      //           r"<p>(.*?)</p>|<h1>(.*?)</h1>",
+      //           dotAll: true,
+      //           caseSensitive: false,
+      //         )
+      //         .firstMatch(blocks[i])
+      //         ?.groups([1, 2])
+      //         .whereType<String>()
+      //         .join(" ") ??
+      //     "";
 
       final regex = RegExp(RegExp.escape(searchTerm), caseSensitive: false);
       for (final m in regex.allMatches(blockText)) {
-        allMatches.add(MatchInfo(blockIndex: i, start: m.start, end: m.end));
+        allMatchesText.add(MatchInfo(blockIndex: i, start: m.start, end: m.end));
       }
     }
 
-    if (allMatches.isNotEmpty) scrollToActive();
+    if (allMatchesText.isNotEmpty) scrollToActive();
     setState(() {});
   }
 
   void nextMatch() {
-    if (allMatches.isEmpty) return;
-    activeMatchIndex = (activeMatchIndex + 1) % allMatches.length;
+    if (allMatchesText.isEmpty) return;
+    activeMatchIndex = (activeMatchIndex + 1) % allMatchesText.length;
+    print("NextActiveMatchIndex : $activeMatchIndex");
     scrollToActive();
     setState(() {});
   }
 
   void prevMatch() {
-    if (allMatches.isEmpty) return;
+    if (allMatchesText.isEmpty) return;
     activeMatchIndex =
-        (activeMatchIndex - 1 + allMatches.length) % allMatches.length;
+        (activeMatchIndex - 1 + allMatchesText.length) % allMatchesText.length;
+    print("PrevActiveMatchIndex : $activeMatchIndex");
     scrollToActive();
     setState(() {});
   }
 
   void scrollToActive() {
-    if (allMatches.isEmpty) return;
-    final key = blockKeys[allMatches[activeMatchIndex].blockIndex];
+    if (allMatchesText.isEmpty) return;
+    final key = blockKeys[allMatchesText[activeMatchIndex].blockIndex];
+    print("Key: ${key.currentContext}");
     final context = key.currentContext;
     if (context != null) {
       Scrollable.ensureVisible(
@@ -233,15 +256,16 @@ class _HtmlSearchViewState extends State<HtmlSearchView> {
     final buffer = StringBuffer();
     int lastIndex = 0;
 
-    final blockMatches = allMatches
+    final blockMatches = allMatchesText
         .where((m) => m.blockIndex == blockIndex)
         .toList();
+
 
     for (int i = 0; i < blockMatches.length; i++) {
       final m = blockMatches[i];
       buffer.write(innerContent.substring(lastIndex, m.start));
 
-      bool isActiveMatch = allMatches[activeMatchIndex] == m;
+      bool isActiveMatch = allMatchesText[activeMatchIndex] == m;
 
       buffer.write(
         '<span style="background-color:${isActiveMatch ? 'red' : 'yellow'};">${innerContent.substring(m.start, m.end)}</span>',
@@ -295,7 +319,7 @@ class _HtmlSearchViewState extends State<HtmlSearchView> {
     searchController.clear();
     searchTerm = "";
     activeMatchIndex = 0;
-    allMatches.clear();
+    allMatchesText.clear();
     setState(() {});
   }
 
@@ -331,6 +355,7 @@ class _HtmlSearchViewState extends State<HtmlSearchView> {
           children: List.generate(blocks.length, (index) {
             final html = highlightBlock(blocks[index], index);
             return Container(
+
               key: blockKeys[index],
               margin: const EdgeInsets.only(bottom: 12),
               child: HtmlWidget(html,

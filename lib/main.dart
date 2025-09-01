@@ -4,6 +4,7 @@ import 'package:flutter_bloc_tutorial/counter/bloc/counter_bloc.dart';
 import 'package:flutter_bloc_tutorial/favourite/bloc/favourite_bloc.dart';
 import 'package:flutter_bloc_tutorial/image_picker/bloc/image_picker_bloc.dart';
 import 'package:flutter_bloc_tutorial/repository/favourite_repository.dart';
+import 'package:flutter_bloc_tutorial/search/html.dart';
 import 'package:flutter_bloc_tutorial/switch_example/bloc/switch_bloc.dart';
 import 'package:flutter_bloc_tutorial/todo/bloc/todo_bloc.dart';
 import 'package:flutter_bloc_tutorial/utils/image_picker_utils.dart';
@@ -33,7 +34,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         ),
-        home: const FavouriteView(),
+        home: const HtmlSearchView(),
       ),
     );
   }
