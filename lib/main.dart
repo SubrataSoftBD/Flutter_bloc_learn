@@ -3,7 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_bloc_tutorial/counter/bloc/counter_bloc.dart';
 import 'package:flutter_bloc_tutorial/favourite/bloc/favourite_bloc.dart';
 import 'package:flutter_bloc_tutorial/image_picker/bloc/image_picker_bloc.dart';
+import 'package:flutter_bloc_tutorial/post/bloc/post_bloc.dart';
+import 'package:flutter_bloc_tutorial/post/post_view.dart';
 import 'package:flutter_bloc_tutorial/repository/favourite_repository.dart';
+import 'package:flutter_bloc_tutorial/repository/post_repository.dart';
 import 'package:flutter_bloc_tutorial/switch_example/bloc/switch_bloc.dart';
 import 'package:flutter_bloc_tutorial/todo/bloc/todo_bloc.dart';
 import 'package:flutter_bloc_tutorial/utils/image_picker_utils.dart';
@@ -27,13 +30,14 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => ImagePickerBloc(ImagePickerUtils())),
         BlocProvider(create: (context) => TodoBloc()),
         BlocProvider(create: (context) => FavouriteBloc(FavouriteRepository())),
+        BlocProvider(create: (context) => PostBloc(PostRepository())),
       ],
       child: MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         ),
-        home: const FavouriteView(),
+        home: const PostView(),
       ),
     );
   }

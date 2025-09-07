@@ -22,7 +22,24 @@ class _FavouriteViewState extends State<FavouriteView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Todo App")),
+      appBar: AppBar(
+        title: Text("Todo App"),
+        actions: [
+          BlocBuilder<FavouriteBloc, FavouriteState>(
+            builder: (context, state) {
+              return Visibility(
+                visible: state.tempFavouriteList.isNotEmpty ? true : false,
+                child: IconButton(
+                  onPressed: () {
+                    context.read<FavouriteBloc>().add(DeleteItem());
+                  },
+                  icon: Icon(Icons.delete, color: Colors.red),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: BlocBuilder<FavouriteBloc, FavouriteState>(
