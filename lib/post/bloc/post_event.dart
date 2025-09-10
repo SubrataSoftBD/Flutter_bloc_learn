@@ -7,3 +7,9 @@ abstract class PostEvent extends Equatable {
 }
 
 class PostFetchEvent extends PostEvent {}
+
+class PostSearchItems extends PostEvent {
+  final String searchText;
+
+  PostSearchItems(this.searchText);
+}

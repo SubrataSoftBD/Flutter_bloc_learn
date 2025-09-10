@@ -4,16 +4,20 @@ import 'package:flutter_bloc_tutorial/post/bloc/post_state.dart';
 import 'package:flutter_bloc_tutorial/repository/post_repository.dart';
 import 'package:flutter_bloc_tutorial/utils/status.dart';
 
-class PostBloc extends Bloc<PostEvent, PostState> {
-  PostRepository postRepository = PostRepository();
+import '../../model/data_list_model.dart';
 
-  PostBloc(this.postRepository) : super(PostState()) {
+class PostBloc extends Bloc<PostEvent, PostState> {
+  PostRepository? postRepository = PostRepository();
+  List<DataListModel> tempPostList = [];
+
+  PostBloc() : super(PostState()) {
     on<PostFetchEvent>(fetchPost);
+    on<PostSearchItems>(_filterList);
   }
 
   void fetchPost(PostFetchEvent event, Emitter<PostState> emit) async {
     await postRepository
-        .fetchData()
+        ?.fetchData()
         .then((value) {
           emit(
             state.copyWith(
@@ -31,5 +35,27 @@ class PostBloc extends Bloc<PostEvent, PostState> {
             ),
           );
         });
+  }
+
+  void _filterList(PostSearchItems event, Emitter<PostState> emit) async {
+    if (event.searchText.isEmpty) {
+      emit(state.copyWith(tempPostList: [], errorMessage: ""));
+    } else {
+      tempPostList = state.postList
+          .where(
+            (element) => element.id.toString() == event.searchText.toString(),
+          )
+          .toList();
+      if (tempPostList.isEmpty) {
+        emit(
+          state.copyWith(
+            tempPostList: tempPostList,
+            errorMessage: "No data found",
+          ),
+        );
+      } else {
+        emit(state.copyWith(tempPostList: tempPostList, errorMessage: ""));
+      }
+    }
   }
 }
