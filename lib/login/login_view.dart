@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_bloc_tutorial/login/bloc/login_bloc.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -8,8 +10,15 @@ class LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<LoginView> {
+  late LoginBloc _loginBloc;
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
+
+  @override
+  void initState() {
+    _loginBloc = LoginBloc();
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -22,44 +31,65 @@ class _LoginViewState extends State<LoginView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Login View")),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(10),
-          child: Column(
-            children: [
-              TextField(
-                controller: email,
-                decoration: InputDecoration(
-                  hintText: "Enter your email",
-                  border: OutlineInputBorder(),
+      body: BlocProvider(
+        create: (context) => LoginBloc(),
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.all(10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                BlocBuilder<LoginBloc, LoginState>(
+                  buildWhen: (prev, current) => current.email != prev.email,
+                  builder: (context, state) {
+                    return TextFormField(
+                      keyboardType: TextInputType.emailAddress,
+                      controller: email,
+                      decoration: InputDecoration(
+                        hintText: "Enter your email",
+                        border: OutlineInputBorder(),
+                      ),
+
+                      onChanged: (value) {
+                        context.read<LoginBloc>().add(EmailChanged(value));
+                      },
+                      onFieldSubmitted: (v) {},
+                    );
+                  },
                 ),
+                SizedBox(height: 10),
+                BlocBuilder<LoginBloc, LoginState>(
+                  buildWhen: (prev, current) =>
+                      current.password != prev.password,
+                  builder: (context, state) {
+                    return TextFormField(
+                      controller: password,
+                      decoration: InputDecoration(
+                        hintText: "Enter your password",
 
-                onChanged: (value) {},
-              ),
-              SizedBox(height: 10),
-              TextField(
-                controller: password,
-                decoration: InputDecoration(
-                  hintText: "Enter your password",
-
-                  border: OutlineInputBorder(),
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (value) {
+                        context.read<LoginBloc>().add(PasswordChanged(value));
+                      },
+                      onFieldSubmitted: (v) {},
+                    );
+                  },
                 ),
-                onChanged: (value) {},
-              ),
-              SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(onPressed: (){}, child: Text("Login"),
-                    style: ElevatedButton.styleFrom(
-
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {},
+                        child: Text("Login"),
+                        style: ElevatedButton.styleFrom(),
+                      ),
                     ),
-
-                    ),
-                  ),
-                ],
-              )
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
